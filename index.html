@@ -55,6 +55,7 @@
       align-items: center;
       padding: 1.5rem;
       transition: opacity 0.8s ease-in-out, visibility 0.8s;
+      overflow: hidden; /* Prevent background rings from triggering screen-level overflow */
     }
 
     #login-page.hidden {
@@ -219,6 +220,10 @@
       text-shadow: 0 0 20px rgba(191,224,255,0.5);
     }
 
+    .brand-text-mobile {
+      display: none;
+    }
+
     .navbar-brand .heart-icon {
       font-size: 1.4rem;
       animation: heartbeat 1.4s ease-in-out infinite;
@@ -343,6 +348,17 @@
       color: var(--star);
       border-left-color: var(--gold);
       text-shadow: 0 0 12px rgba(191,224,255,0.5);
+    }
+
+    .logout-nav-item {
+      color: #ff6b6b !important;
+      margin-top: auto !important; /* Push to bottom of sidebar */
+      border-left-color: transparent !important;
+    }
+    .logout-nav-item:hover {
+      color: #ff8a8a !important;
+      border-left-color: #ff6b6b !important;
+      text-shadow: 0 0 12px rgba(255, 107, 107, 0.4) !important;
     }
 
     .nav-item .icon {
@@ -1462,10 +1478,19 @@
     /* Mobile (Phone) Optimization Overrides */
     @media (max-width: 480px) {
       .main {
-        padding: 1.2rem 0.8rem !important;
+        padding: 1.2rem 0.8rem 6rem !important; /* Spacious bottom padding so contents don't hit browser's bottom navigation bar */
+      }
+      #login-page {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 1.5rem !important;
+        overflow: hidden !important;
       }
       .login-card {
+        margin: auto !important;
         padding: 2.2rem 1.5rem !important;
+        max-width: 320px !important;
       }
       .login-title {
         font-size: 2.4rem !important;
@@ -1473,20 +1498,20 @@
       .login-heart {
         font-size: 2.8rem !important;
       }
-      #login-page {
-        overflow-y: auto !important;
-        align-items: flex-start !important;
-        padding: 2rem 1rem !important;
-      }
       .navbar {
         padding: 0 1rem !important;
+      }
+      .brand-text-desktop {
+        display: none;
+      }
+      .brand-text-mobile {
+        display: inline;
       }
       .navbar-brand {
         font-size: 1.25rem !important;
       }
       .logout-btn {
-        padding: 0.4rem 0.8rem !important;
-        font-size: 0.75rem !important;
+        display: none !important; /* Hide old navbar logout button */
       }
       .btn-yes-sweet, .btn-yes-threat {
         padding: 1rem 1.2rem !important;
@@ -1502,10 +1527,13 @@
         align-items: center !important;
       }
       .letter-paper {
-        padding: 2rem 1.2rem !important;
+        padding: 2.2rem 1.2rem 3.5rem !important; /* Spaced bottom inside gold frame */
         font-size: 1.15rem !important;
         line-height: 1.8rem !important;
         overflow-wrap: break-word;
+      }
+      .letter-text {
+        padding-bottom: 2.5rem !important; /* Prevent typewriter text from overlaying gold borders or corner ornaments */
       }
       .future-timeline {
         padding-left: 1.5rem !important;
@@ -1514,7 +1542,11 @@
         left: -1.75rem !important;
       }
       .acrostic-container {
-        padding: 1.2rem 0.8rem !important;
+        padding: 0.8rem 0 !important; /* Remove nested card padding, borders, backgrounds to give full horizontal width */
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        margin-top: 1rem !important;
       }
       .acrostic-letter {
         font-size: 1.6rem !important;
@@ -1545,6 +1577,18 @@
       @keyframes heartbeat-mini {
         0%, 100% { transform: translateY(-4px) scale(1.03); }
         50% { transform: translateY(-4px) scale(1.06); }
+      }
+      .message-bubble {
+        max-width: 95% !important;
+        padding: 0.9rem 1.1rem !important;
+        font-size: 0.88rem !important;
+      }
+      .memory-group {
+        padding: 1rem !important;
+        gap: 0.4rem !important;
+      }
+      .section-header {
+        margin-bottom: 1.2rem !important;
       }
     }
   </style>
@@ -1581,10 +1625,10 @@
 <nav class="navbar">
   <div class="navbar-brand">
     <span class="heart-icon">💙</span>
-    Mon Cher Petit Cœur
+    <span class="brand-text-desktop">Mon Cher Petit Cœur</span>
+    <span class="brand-text-mobile">Mon Petit Cœur</span>
   </div>
   <div class="navbar-right">
-    <button class="logout-btn" onclick="performLogout()">Déconnexion</button>
     <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -1622,6 +1666,12 @@
 
   <button class="nav-item" onclick="showSection('proposal', this)">
     <span class="icon">❓</span> Will You Be Mine?
+  </button>
+
+  <div class="sidebar-divider"></div>
+
+  <button class="nav-item logout-nav-item" onclick="performLogout()">
+    <span class="icon">🚪</span> Déconnexion
   </button>
 </aside>
 
