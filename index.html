@@ -377,6 +377,7 @@
     /* ===== MAIN CONTENT ===== */
     .main {
       margin-left: var(--sidebar-w);
+      margin-top: var(--navbar-h);
       height: calc(100vh - var(--navbar-h));
       height: calc(100dvh - var(--navbar-h));
       padding: 2.5rem 3rem;
@@ -1485,7 +1486,11 @@
         justify-content: center !important;
         align-items: center !important;
         padding: 1.5rem !important;
-        overflow: hidden !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+      }
+      .login-ring, .login-sparkle {
+        display: none !important;
       }
       .login-card {
         margin: auto !important;
@@ -1549,11 +1554,15 @@
         margin-top: 1rem !important;
       }
       .acrostic-letter {
-        font-size: 1.6rem !important;
-        width: 25px !important;
+        font-size: 1.4rem !important;
+        width: 22px !important;
       }
       .acrostic-line {
         font-size: 0.88rem !important;
+        margin-bottom: 0.6rem !important;
+      }
+      .acrostic-space {
+        height: 1.2rem !important;
       }
       .hearts-grid {
         grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
@@ -1601,8 +1610,10 @@
 
 <!-- LOGIN PAGE -->
 <div id="login-page">
-  <div class="login-ring ring-1"></div>
-  <div class="login-ring ring-2"></div>
+  <div class="login-bg-container" style="position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;">
+    <div class="login-ring ring-1"></div>
+    <div class="login-ring ring-2"></div>
+  </div>
   
   <div class="login-card">
     <div class="login-sparkle sparkle-1">✨</div>
