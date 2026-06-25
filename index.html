@@ -220,9 +220,7 @@
       text-shadow: 0 0 20px rgba(191,224,255,0.5);
     }
 
-    .brand-text-mobile {
-      display: none;
-    }
+
 
     .navbar-brand .heart-icon {
       font-size: 1.4rem;
@@ -892,7 +890,7 @@
 
     .acrostic-line {
       display: flex;
-      align-items: flex-start;
+      align-items: baseline;
       margin-bottom: 1.2rem;
       font-size: 1.15rem;
       line-height: 1.8;
@@ -903,11 +901,10 @@
       font-size: 2.4rem;
       font-weight: 700;
       color: var(--gold);
-      width: 45px;
+      margin-right: 4px;
       line-height: 1;
       text-shadow: 0 0 15px rgba(255,215,0,0.5);
       flex-shrink: 0;
-      margin-top: -0.4rem;
     }
 
     .acrostic-phrase {
@@ -1099,7 +1096,7 @@
       .letter-paper { padding: 2rem 1.5rem; font-size: 1.3rem; line-height: 1.9rem; background-size: 100% 1.9rem; }
       .letter-paper::before { left: 1.2rem; }
       .acrostic-container { padding: 1.5rem 1rem; }
-      .acrostic-letter { font-size: 1.8rem; width: 30px; }
+      .acrostic-letter { font-size: 1.8rem; }
       .acrostic-line { font-size: 0.95rem; }
     }
 
@@ -1506,12 +1503,7 @@
       .navbar {
         padding: 0 1rem !important;
       }
-      .brand-text-desktop {
-        display: none;
-      }
-      .brand-text-mobile {
-        display: inline;
-      }
+
       .navbar-brand {
         font-size: 1.25rem !important;
       }
@@ -1555,7 +1547,6 @@
       }
       .acrostic-letter {
         font-size: 1.4rem !important;
-        width: 22px !important;
       }
       .acrostic-line {
         font-size: 0.88rem !important;
@@ -1636,8 +1627,7 @@
 <nav class="navbar">
   <div class="navbar-brand">
     <span class="heart-icon">💙</span>
-    <span class="brand-text-desktop">Mon Cher Petit Cœur</span>
-    <span class="brand-text-mobile">Mon Petit Cœur</span>
+    Mon Cher Petit Cœur
   </div>
   <div class="navbar-right">
     <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Menu">
@@ -1947,12 +1937,6 @@
         <div class="gallery-item">
           <img src="fine_boy_2.jpg" alt="Certified Fine Boy 2" class="gallery-image">
           <div class="gallery-desc">Ton charme au naturel hyper craquant.</div>
-        </div>
-
-        <!-- Video 1 -->
-        <div class="gallery-item">
-          <video src="fine_boy_video.mov" controls class="gallery-image" poster="fine_boy_1.jpg"></video>
-          <div class="gallery-desc">C'est comme un ange qui me fait fondre</div>
         </div>
 
         <!-- Photo 3 -->
@@ -2438,8 +2422,11 @@
   // ===== LOGIN CHECK =====
   const correctPassword = "makaty";
   
-  // Check if session exists in localStorage
-  if (localStorage.getItem("makaty_login") === "true") {
+  // Clear any legacy localStorage login session to enforce correct security
+  localStorage.removeItem("makaty_login");
+
+  // Check if session exists in sessionStorage
+  if (sessionStorage.getItem("makaty_login") === "true") {
     document.getElementById("login-page").classList.add("hidden");
   }
 
@@ -2448,7 +2435,7 @@
     const errorEl = document.getElementById("login-error");
     
     if (inputVal === correctPassword) {
-      localStorage.setItem("makaty_login", "true");
+      sessionStorage.setItem("makaty_login", "true");
       document.getElementById("login-page").classList.add("hidden");
       // Trigger typewriter effect once logged in
       setTimeout(startTypewriter, 800);
@@ -2462,7 +2449,7 @@
   }
 
   function performLogout() {
-    localStorage.removeItem("makaty_login");
+    sessionStorage.removeItem("makaty_login");
     document.getElementById("password-input").value = "";
     document.getElementById("login-error").style.display = "none";
     document.getElementById("login-page").classList.remove("hidden");
@@ -2939,7 +2926,7 @@ Je n’ai peut-être pas grand-chose à t’offrir, mais je peux te donner ce qu
   requestAnimationFrame(animate);
 
   // Trigger typewriter initially if session is already active
-  if (localStorage.getItem("makaty_login") === "true") {
+  if (sessionStorage.getItem("makaty_login") === "true") {
     setTimeout(startTypewriter, 500);
   }
 </script>
