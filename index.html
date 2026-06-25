@@ -1,0 +1,2886 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mon Cher Petit Cœur</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&family=Dancing+Script:wght@500;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    /* ===== RESET & VARIABLES ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --navy:       #030914;
+      --deep-blue:  #081229;
+      --mid-blue:   #0e1f42;
+      --bright-blue:#142d5e;
+      --accent:     #316cd8;
+      --glow:       #549bf2;
+      --star:       #bfe0ff;
+      --gold:       #ffd700;
+      --white:      #f0f4fc;
+      --glass:      rgba(14, 31, 66, 0.6);
+      --glass-border: rgba(84, 155, 242, 0.25);
+      --sidebar-w:  270px;
+      --navbar-h:   64px;
+      --transition: 0.35s cubic-bezier(.4,0,.2,1);
+    }
+
+    html, body {
+      height: 100%;
+      height: 100dvh;
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Lato', sans-serif;
+      overflow: hidden;
+    }
+
+    /* ===== CANVAS SPARKLES ===== */
+    #sparkle-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ===== LOGIN PAGE ===== */
+    #login-page {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: radial-gradient(circle at center, rgba(3, 9, 20, 0.45) 0%, rgba(3, 9, 20, 0.85) 100%);
+      backdrop-filter: blur(16px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+      transition: opacity 0.8s ease-in-out, visibility 0.8s;
+    }
+
+    #login-page.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .login-card {
+      background: rgba(14, 31, 66, 0.7);
+      border: 2px solid var(--gold);
+      border-radius: 24px;
+      padding: 3.5rem 2.5rem;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      backdrop-filter: blur(24px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 
+                  0 0 35px rgba(255, 215, 0, 0.25), 
+                  inset 0 0 15px rgba(255, 215, 0, 0.15);
+      position: relative;
+      overflow: hidden;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: -50%; left: -60%;
+      width: 30%; height: 200%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+      transform: rotate(30deg);
+      animation: shine-sweep 4s infinite linear;
+    }
+
+    @keyframes shine-sweep {
+      0% { left: -60%; }
+      100% { left: 160%; }
+    }
+
+    .login-sparkle {
+      position: absolute;
+      pointer-events: none;
+      font-size: 1.3rem;
+      animation: floatSparkle 3s ease-in-out infinite;
+    }
+    .sparkle-1 { top: 15px; left: 20px; animation-delay: 0s; color: var(--gold); }
+    .sparkle-2 { top: 40px; right: 25px; animation-delay: 0.8s; color: var(--star); }
+    .sparkle-3 { bottom: 30px; left: 30px; animation-delay: 1.5s; color: var(--star); }
+    .sparkle-4 { bottom: 20px; right: 40px; animation-delay: 2.2s; color: var(--gold); }
+
+    @keyframes floatSparkle {
+      0%, 100% { transform: translateY(0) scale(1) rotate(0deg); opacity: 0.3; filter: drop-shadow(0 0 5px currentColor); }
+      50% { transform: translateY(-8px) scale(1.2) rotate(15deg); opacity: 0.9; filter: drop-shadow(0 0 10px currentColor); }
+    }
+
+    .login-heart {
+      font-size: 3.5rem;
+      color: var(--gold);
+      text-shadow: 0 0 25px rgba(255,215,0,0.6);
+      margin-bottom: 1rem;
+      animation: heartbeat 1.5s ease-in-out infinite;
+    }
+
+    .login-title {
+      font-family: 'Dancing Script', cursive;
+      font-size: 3.2rem;
+      color: var(--gold);
+      text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+      margin-bottom: 0.5rem;
+    }
+
+    .login-subtitle {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: rgba(191, 224, 255, 0.75);
+      margin-bottom: 2rem;
+      font-style: italic;
+    }
+
+    .login-input-group {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 1rem 1.2rem;
+      border-radius: 12px;
+      border: 1px solid var(--glass-border);
+      background: rgba(8,18,41,0.6);
+      color: var(--white);
+      font-size: 1rem;
+      text-align: center;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .login-input:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 15px rgba(255,215,0,0.3);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 1.1rem;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #ffd700 0%, #ffea70 50%, #d4a017 100%);
+      color: #030914;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      box-shadow: 0 5px 20px rgba(212,160,23,0.35);
+      transition: var(--transition);
+      text-transform: uppercase;
+    }
+
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 215, 0, 0.6);
+    }
+
+    .login-error {
+      color: #ff6b6b;
+      font-size: 0.88rem;
+      margin-top: 1rem;
+      display: none;
+      animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+
+    /* ===== NAVBAR ===== */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--navbar-h);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      background: linear-gradient(135deg, rgba(3,9,20,0.95) 0%, rgba(8,18,41,0.95) 100%);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      box-shadow: 0 4px 32px rgba(8,18,41,0.5);
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.8rem;
+      color: var(--star);
+      text-shadow: 0 0 20px rgba(191,224,255,0.5);
+    }
+
+    .navbar-brand .heart-icon {
+      font-size: 1.4rem;
+      animation: heartbeat 1.4s ease-in-out infinite;
+    }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .logout-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 107, 107, 0.4);
+      color: #ff8a8a;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 107, 107, 0.15);
+      border-color: #ff6b6b;
+      box-shadow: 0 0 10px rgba(255, 107, 107, 0.2);
+    }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 6px;
+      border: none;
+      background: transparent;
+    }
+    .hamburger span {
+      display: block;
+      width: 22px; height: 2px;
+      background: var(--star);
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    /* ===== LAYOUT WRAPPER ===== */
+    .layout {
+      display: flex;
+      height: 100vh;
+      padding-top: var(--navbar-h);
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: var(--navbar-h);
+      bottom: 0;
+      width: var(--sidebar-w);
+      z-index: 90;
+      background: linear-gradient(180deg, rgba(8,18,41,0.97) 0%, rgba(3,9,20,0.98) 100%);
+      backdrop-filter: blur(24px);
+      border-right: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      padding: 1.5rem 0;
+      overflow-y: auto;
+      transition: transform var(--transition);
+    }
+
+    .sidebar-title {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.1rem;
+      color: rgba(191,224,255,0.45);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0 1.4rem 1.2rem;
+      border-bottom: 1px solid rgba(84,155,242,0.15);
+      margin-bottom: 0.8rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      padding: 0.82rem 1.4rem;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: rgba(191,224,255,0.72);
+      font-family: 'Lato', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 400;
+      letter-spacing: 0.03em;
+      text-align: left;
+      width: 100%;
+      border-left: 3px solid transparent;
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(49,108,216,0.18), transparent);
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+
+    .nav-item:hover::before,
+    .nav-item.active::before { opacity: 1; }
+
+    .nav-item:hover,
+    .nav-item.active {
+      color: var(--white);
+      border-left-color: var(--glow);
+    }
+
+    .nav-item.active {
+      color: var(--star);
+      border-left-color: var(--gold);
+      text-shadow: 0 0 12px rgba(191,224,255,0.5);
+    }
+
+    .nav-item .icon {
+      font-size: 1.1rem;
+      width: 24px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      background: rgba(84,155,242,0.15);
+      margin: 0.6rem 1.4rem;
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main {
+      margin-left: var(--sidebar-w);
+      height: calc(100vh - var(--navbar-h));
+      height: calc(100dvh - var(--navbar-h));
+      padding: 2.5rem 3rem;
+      overflow-y: auto;
+      position: relative;
+      z-index: 1;
+      scroll-behavior: smooth;
+    }
+
+    /* ===== CONTENT SECTIONS ===== */
+    .section {
+      display: none;
+      animation: fadeInUp 0.55s ease forwards;
+    }
+    .section.active { display: block; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(28px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== GLASS CARD ===== */
+    .glass-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 2.5rem 2.8rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 40px rgba(8,18,41,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section-header {
+      margin-bottom: 2rem;
+    }
+
+    .section-tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 0.6rem;
+      opacity: 0.85;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 700;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #bfe0ff 0%, #f0f4fc 50%, #549bf2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-subtitle {
+      font-size: 0.9rem;
+      color: rgba(191,224,255,0.5);
+      font-style: italic;
+    }
+
+    .divider-line {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--glow), transparent);
+      margin: 1.6rem 0;
+      opacity: 0.4;
+    }
+
+    /* ===== HANDWRITTEN LETTER ===== */
+    .letter-paper {
+      background: #fcfbf7;
+      color: #2b3542;
+      border-radius: 12px;
+      padding: 3rem 3.5rem;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4), inset 0 0 40px rgba(0,0,0,0.03);
+      position: relative;
+      min-height: 480px;
+      font-family: 'Caveat', cursive;
+      font-size: 1.6rem;
+      line-height: 2.2rem;
+      border: 1px solid #e3dec9;
+      background-image: 
+        radial-gradient(circle at 0% 0%, rgba(220,180,120,0.05) 0%, transparent 100%),
+        linear-gradient(rgba(0,0,0,0) 0%, rgba(0,0,0,0) 96%, #e3dcb5 96%);
+      background-size: 100% 2.2rem;
+      background-attachment: local;
+    }
+
+    /* Red vertical margin line for school-paper vibe */
+    .letter-paper::before {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0; left: 2.5rem;
+      width: 1px;
+      background: rgba(220, 100, 100, 0.4);
+    }
+
+    .letter-decor-top {
+      position: absolute;
+      top: 10px; right: 20px;
+      font-size: 2rem;
+      opacity: 0.3;
+      transform: rotate(15deg);
+    }
+
+    .letter-decor-bottom {
+      position: absolute;
+      bottom: 10px; left: 40px;
+      font-size: 2.2rem;
+      opacity: 0.25;
+      transform: rotate(-10deg);
+    }
+
+    .letter-text {
+      white-space: pre-wrap;
+      padding-left: 0.8rem;
+    }
+
+    /* ===== SCRATCH CARDS (PROMISES) ===== */
+    .scratch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .scratch-card {
+      position: relative;
+      width: 100%;
+      height: 180px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(20,45,94,0.7), rgba(8,18,41,0.9));
+      border: 1px solid rgba(84,155,242,0.3);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    .scratch-card-content {
+      z-index: 1;
+    }
+
+    .scratch-card-icon {
+      font-size: 2.3rem;
+      margin-bottom: 0.6rem;
+      filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.4));
+    }
+
+    .scratch-card-text {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: var(--white);
+    }
+
+    .scratch-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 5;
+      cursor: pointer;
+      touch-action: none;
+    }
+
+    .scratch-hint {
+      position: absolute;
+      bottom: 8px;
+      font-size: 0.72rem;
+      color: rgba(191,224,255,0.4);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* ===== FLIPPING CARDS (QUALITIES) ===== */
+    .flip-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .flip-card {
+      background-color: transparent;
+      width: 100%;
+      height: 200px;
+      perspective: 1000px;
+      cursor: pointer;
+    }
+
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+    }
+
+    .flip-card-front {
+      background: linear-gradient(135deg, rgba(20,45,94,0.5), rgba(8,18,41,0.7));
+      border: 1px solid var(--glass-border);
+      color: var(--white);
+    }
+
+    .flip-card-front .icon {
+      font-size: 2.8rem;
+      margin-bottom: 0.8rem;
+      filter: drop-shadow(0 0 10px rgba(84,155,242,0.4));
+    }
+
+    .flip-card-front h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--star);
+    }
+
+    .flip-card-front .hint {
+      margin-top: 1rem;
+      font-size: 0.72rem;
+      color: rgba(191,224,255,0.45);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .flip-card-back {
+      color: white;
+      transform: rotateY(180deg);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Custom Back Colors */
+    .q-1 .flip-card-back { background: linear-gradient(135deg, #1b3d7b, #0f2347); border: 1px solid #2e62c2; }
+    .q-2 .flip-card-back { background: linear-gradient(135deg, #512b77, #2c1247); border: 1px solid #7d44be; }
+    .q-3 .flip-card-back { background: linear-gradient(135deg, #1a6262, #0c3535); border: 1px solid #2d9e9e; }
+    .q-4 .flip-card-back { background: linear-gradient(135deg, #70551c, #3d2d0c); border: 1px solid #c0983d; }
+    .q-5 .flip-card-back { background: linear-gradient(135deg, #702525, #3f0f0f); border: 1px solid #be4444; }
+    .q-6 .flip-card-back { background: linear-gradient(135deg, #1d562e, #0e3017); border: 1px solid #309b4f; }
+    .q-7 .flip-card-back { background: linear-gradient(135deg, #561d50, #300d2c); border: 1px solid #94358a; }
+    .q-8 .flip-card-back { background: linear-gradient(135deg, #1c5656, #092c2c); border: 1px solid #329696; }
+
+    .flip-card-back h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #ffd700;
+      margin-bottom: 0.6rem;
+    }
+
+    .flip-card-back p {
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    /* ===== FINE BOY (PHOTOS & VIDEOS) ===== */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 2rem;
+      margin-top: 1.5rem;
+    }
+
+    .gallery-item {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 1.2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .gallery-item:hover {
+      transform: translateY(-5px);
+      border-color: var(--glow);
+    }
+
+    .gallery-image {
+      width: 100%;
+      height: 320px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid rgba(84, 155, 242, 0.25);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      transition: var(--transition);
+    }
+
+    .gallery-item:hover .gallery-image {
+      border-color: var(--gold);
+      box-shadow: 0 8px 25px rgba(255, 215, 0, 0.2);
+    }
+
+    .media-placeholder {
+      width: 100%;
+      height: 220px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(8,18,41,0.8), rgba(20,45,94,0.6));
+      border: 2px dashed rgba(84,155,242,0.35);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: rgba(191,224,255,0.6);
+      text-align: center;
+      padding: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .media-placeholder::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle, rgba(84,155,242,0.06) 0%, transparent 80%);
+    }
+
+    .media-placeholder .icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .media-placeholder span {
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .gallery-desc {
+      font-size: 0.88rem;
+      text-align: center;
+      font-style: italic;
+      color: var(--star);
+    }
+
+    /* ===== OUR MEMORIES (MESSAGE BUBBLES) ===== */
+    .memories-container {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      max-width: 700px;
+      margin: 1.5rem auto 0;
+    }
+
+    .bubble-wrapper {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .bubble-wrapper.left { align-items: flex-start; }
+    .bubble-wrapper.right { align-items: flex-end; }
+
+    .message-bubble {
+      max-width: 85%;
+      padding: 1.1rem 1.4rem;
+      border-radius: 20px;
+      line-height: 1.6;
+      font-size: 0.95rem;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      position: relative;
+    }
+
+    .bubble-wrapper.left .message-bubble {
+      background: linear-gradient(135deg, rgba(20,45,94,0.8), rgba(8,18,41,0.9));
+      border: 1px solid rgba(84,155,242,0.3);
+      color: var(--white);
+      border-bottom-left-radius: 4px;
+    }
+
+    .bubble-wrapper.right .message-bubble {
+      background: linear-gradient(135deg, rgba(49,108,216,0.35), rgba(20,45,94,0.55));
+      border: 1px solid rgba(84,155,242,0.45);
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .message-bubble .quote-icon {
+      font-size: 1.5rem;
+      color: var(--gold);
+      opacity: 1;
+      font-family: 'Playfair Display', serif;
+      font-weight: bold;
+      vertical-align: middle;
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.45);
+      margin: 0 0.2rem;
+    }
+
+    .message-bubble p {
+      position: relative;
+      z-index: 1;
+      padding: 0;
+    }
+
+    /* Memory Group & Connector */
+    .memory-group {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      gap: 0.5rem;
+      border: 1px solid rgba(84, 155, 242, 0.12);
+      border-radius: 20px;
+      padding: 1.2rem;
+      background: rgba(14, 31, 66, 0.2);
+      transition: var(--transition);
+    }
+    .memory-group:hover {
+      border-color: rgba(255, 215, 0, 0.25);
+      background: rgba(14, 31, 66, 0.4);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+    .memory-connector {
+      width: 2px;
+      height: 16px;
+      border-left: 2px dashed var(--gold);
+      opacity: 0.55;
+      align-self: center;
+      margin: -0.1rem 0;
+      z-index: 2;
+      filter: drop-shadow(0 0 4px var(--gold));
+    }
+
+    /* ===== ROMANTIC WHY I LOVE YOU ===== */
+    .romantic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.8rem;
+      margin-top: 1.5rem;
+    }
+
+    .romantic-card {
+      background: linear-gradient(135deg, rgba(14, 31, 66, 0.7) 0%, rgba(5, 13, 31, 0.85) 100%);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 2rem 1.8rem;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      transition: var(--transition);
+    }
+
+    .romantic-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--glow);
+      box-shadow: 0 15px 35px rgba(84,155,242,0.2);
+    }
+
+    .romantic-card::before {
+      content: '♥';
+      position: absolute;
+      right: -10px; bottom: -20px;
+      font-size: 8rem;
+      color: rgba(84, 155, 242, 0.04);
+      font-family: serif;
+      pointer-events: none;
+    }
+
+    .romantic-num {
+      font-family: 'Dancing Script', cursive;
+      font-size: 2.2rem;
+      color: var(--gold);
+      margin-bottom: 0.8rem;
+      line-height: 1;
+    }
+
+    .romantic-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      line-height: 1.7;
+      color: var(--white);
+      font-style: italic;
+    }
+
+    /* ===== ACROSTIC POEM ===== */
+    .acrostic-container {
+      max-width: 650px;
+      margin: 1.5rem auto 0;
+      padding: 2.5rem 3rem;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      backdrop-filter: blur(12px);
+    }
+
+    .acrostic-line {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 1.2rem;
+      font-size: 1.15rem;
+      line-height: 1.8;
+    }
+
+    .acrostic-letter {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--gold);
+      width: 45px;
+      line-height: 1;
+      text-shadow: 0 0 15px rgba(255,215,0,0.5);
+      flex-shrink: 0;
+      margin-top: -0.4rem;
+    }
+
+    .acrostic-phrase {
+      color: rgba(240,244,252,0.92);
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+    }
+
+    .acrostic-space {
+      height: 2.5rem;
+    }
+
+    /* ===== FUTURE (MARRIAGE) ===== */
+    .future-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .future-card {
+      border-radius: 16px;
+      padding: 1.8rem 1.5rem;
+      background: linear-gradient(135deg, rgba(14,31,66,0.65), rgba(3,9,20,0.85));
+      border: 1px solid rgba(84,155,242,0.22);
+      text-align: center;
+      transition: var(--transition);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    }
+
+    .future-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--gold);
+      box-shadow: 0 12px 30px rgba(255,215,0,0.15);
+    }
+
+    .future-card .f-icon {
+      font-size: 3rem;
+      margin-bottom: 0.8rem;
+      filter: drop-shadow(0 0 10px rgba(255,215,0,0.3));
+    }
+
+    .future-card h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      color: var(--star);
+      margin-bottom: 0.5rem;
+    }
+
+    .future-card p {
+      font-size: 0.88rem;
+      color: rgba(191,224,255,0.65);
+      line-height: 1.6;
+    }
+
+    /* ===== WILL YOU BE MINE ===== */
+    .proposal-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 2rem;
+      padding: 1rem 0 2rem;
+    }
+
+    .big-question {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-style: italic;
+      background: linear-gradient(135deg, #ffffff 0%, #bfe0ff 40%, #549bf2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.3;
+      filter: drop-shadow(0 0 30px rgba(84,155,242,0.5));
+    }
+
+    .proposal-heart {
+      width: 130px;
+      height: 130px;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: heartbeat 1.2s ease-in-out infinite;
+      filter: drop-shadow(0 0 25px rgba(84,155,242,0.7));
+      transform-origin: center;
+    }
+
+    .answer-btns {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .btn-yes-sweet {
+      padding: 1.2rem 3rem;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      font-style: italic;
+      border-radius: 50px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg, #142d5e, #316cd8, #549bf2);
+      color: white;
+      box-shadow: 0 4px 25px rgba(49,108,216,0.6);
+      transition: var(--transition);
+      letter-spacing: 0.05em;
+    }
+    .btn-yes-sweet:hover {
+      transform: scale(1.08);
+      box-shadow: 0 8px 36px rgba(84,155,242,0.8);
+    }
+
+    .btn-yes-threat {
+      padding: 1.2rem 3rem;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.15rem;
+      font-style: italic;
+      border-radius: 50px;
+      border: 2px solid var(--gold);
+      cursor: pointer;
+      background: transparent;
+      color: var(--gold);
+      box-shadow: 0 4px 20px rgba(255,215,0,0.15);
+      transition: var(--transition);
+      letter-spacing: 0.05em;
+    }
+    .btn-yes-threat:hover {
+      transform: scale(1.08);
+      background: rgba(255,215,0,0.08);
+      box-shadow: 0 8px 30px rgba(255,215,0,0.4);
+    }
+
+    .btn-no {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      width: 1px; height: 1px;
+    }
+
+    .response-msg {
+      display: none;
+      font-family: 'Dancing Script', cursive;
+      font-size: 2.2rem;
+      color: var(--gold);
+      text-shadow: 0 0 20px rgba(255,215,0,0.5);
+      animation: fadeInUp 0.5s ease forwards;
+      line-height: 1.4;
+      margin-top: 1rem;
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.15); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+    @keyframes glow-pulse {
+      0%, 100% { text-shadow: 0 0 10px rgba(191,224,255,0.4); }
+      50%       { text-shadow: 0 0 30px rgba(191,224,255,0.9); }
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(84,155,242,0.35);
+      border-radius: 10px;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      :root { --sidebar-w: 260px; }
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open { transform: translateX(0); }
+      .main { margin-left: 0; padding: 1.5rem 1.2rem; height: calc(100vh - var(--navbar-h)) !important; height: calc(100dvh - var(--navbar-h)) !important; }
+      .hamburger { display: flex; }
+      .glass-card { padding: 1.6rem 1.4rem; }
+      .scratch-grid, .flip-grid, .gallery-grid, .romantic-grid, .future-grid { grid-template-columns: 1fr; }
+      .answer-btns { flex-direction: column; align-items: center; gap: 1rem; }
+      .letter-paper { padding: 2rem 1.5rem; font-size: 1.3rem; line-height: 1.9rem; background-size: 100% 1.9rem; }
+      .letter-paper::before { left: 1.2rem; }
+      .acrostic-container { padding: 1.5rem 1rem; }
+      .acrostic-letter { font-size: 1.8rem; width: 30px; }
+      .acrostic-line { font-size: 0.95rem; }
+    }
+
+    /* ===== OVERLAY ===== */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 85;
+      background: rgba(3,9,20,0.6);
+      backdrop-filter: blur(4px);
+    }
+    .overlay.visible { display: block; }
+
+    /* ===== NEW STYLE OVERRIDES ===== */
+    /* Bucket List Styles for Why I Love You */
+    .bucket-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.6rem;
+      width: 100%;
+    }
+    .bucket-checkbox {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      background: rgba(255, 215, 0, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+      font-size: 0.85rem;
+      font-weight: bold;
+      box-shadow: 0 0 8px rgba(255, 215, 0, 0.25);
+    }
+
+    /* Golden Buttons for Proposal Page */
+    .btn-yes-sweet {
+      background: linear-gradient(135deg, #ffd700 0%, #ffea70 50%, #d4a017 100%) !important;
+      color: #030914 !important;
+      box-shadow: 0 4px 25px rgba(212,160,23,0.5) !important;
+    }
+    .btn-yes-sweet:hover {
+      box-shadow: 0 8px 36px rgba(255,215,0,0.7) !important;
+    }
+    .btn-yes-threat {
+      background: transparent !important;
+      border: 2px solid #ffd700 !important;
+      color: #ffd700 !important;
+      box-shadow: 0 4px 20px rgba(212,160,23,0.15) !important;
+    }
+    .btn-yes-threat:hover {
+      background: rgba(255,215,0,0.08) !important;
+      box-shadow: 0 8px 30px rgba(255,215,0,0.4) !important;
+    }
+    /* Navbar Brand Overrides */
+    .navbar-brand {
+      font-size: 1.6rem !important;
+    }
+
+    /* Rotating background rings for Login screen */
+    .login-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px dashed rgba(255, 215, 0, 0.12);
+      pointer-events: none;
+      animation: rotateRing 25s linear infinite;
+      z-index: 0;
+    }
+    .ring-1 { width: 500px; height: 500px; }
+    .ring-2 { width: 700px; height: 700px; animation-duration: 40s; animation-direction: reverse; border-color: rgba(84, 155, 242, 0.08); }
+
+    @keyframes rotateRing {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Letter Paper Design Overrides (Dark blue page with golden-white handwriting) */
+    .letter-paper {
+      background: radial-gradient(circle, #0e2347 0%, #050d1a 100%) !important;
+      color: #fff3db !important;
+      border: 2px solid #d4a017 !important;
+      padding: 4rem 4.5rem !important;
+      min-height: 540px !important;
+      line-height: 2.3rem !important;
+      background-image: none !important;
+      border-radius: 16px !important;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), 
+                  inset 0 0 35px rgba(255, 215, 0, 0.15) !important;
+      text-shadow: 0 0 10px rgba(255, 243, 219, 0.25);
+    }
+    /* Inner dashed gold border frame */
+    .letter-paper::before {
+      content: '' !important;
+      position: absolute !important;
+      inset: 12px !important;
+      border: 1px dashed rgba(212, 160, 23, 0.4) !important;
+      border-radius: 8px !important;
+      background: none !important;
+      width: auto !important;
+      pointer-events: none !important;
+    }
+    .wax-seal {
+      width: 65px; height: 65px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #ffd97d 0%, #d4a017 55%, #9b7008 100%);
+      border: 2px solid #e2bd59;
+      box-shadow: 0 5px 12px rgba(0,0,0,0.2), inset 0 2px 4px rgba(255,255,255,0.45);
+      margin: 0 auto 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+    }
+    .wax-seal::after {
+      content: '';
+      position: absolute;
+      inset: 5px;
+      border-radius: 50%;
+      border: 1px dashed rgba(255, 255, 255, 0.35);
+    }
+    .wax-seal .seal-icon {
+      font-size: 1.6rem;
+      color: #3b2c01;
+      filter: drop-shadow(0 1px 0 rgba(255,255,255,0.3));
+    }
+    .co-decor {
+      position: absolute;
+      width: 45px; height: 45px;
+      opacity: 0.85;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .co-top-left { top: 15px; left: 15px; border-left: 2px solid #d4a017; border-top: 2px solid #d4a017; border-top-left-radius: 12px; }
+    .co-top-left::after { content: '✿'; color: #d4a017; position: absolute; top: -3px; left: -3px; font-size: 0.9rem; }
+    .co-top-right { top: 15px; right: 15px; border-right: 2px solid #d4a017; border-top: 2px solid #d4a017; border-top-right-radius: 12px; }
+    .co-top-right::after { content: '✿'; color: #d4a017; position: absolute; top: -3px; right: -3px; font-size: 0.9rem; }
+    .co-bottom-left { bottom: 15px; left: 15px; border-left: 2px solid #d4a017; border-bottom: 2px solid #d4a017; border-bottom-left-radius: 12px; }
+    .co-bottom-left::after { content: '✿'; color: #d4a017; position: absolute; bottom: -3px; left: -3px; font-size: 0.9rem; }
+    .co-bottom-right { bottom: 15px; right: 15px; border-right: 2px solid #d4a017; border-bottom: 2px solid #d4a017; border-bottom-right-radius: 12px; }
+    .co-bottom-right::after { content: '✿'; color: #d4a017; position: absolute; bottom: -3px; right: -3px; font-size: 0.9rem; }
+    .letter-date {
+      text-align: right;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      color: #8c7b64;
+      margin-bottom: 2rem;
+      font-style: italic;
+    }
+
+    /* Scratch/Promises Design (Image 2) */
+    .wishes-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      letter-spacing: 0.08em;
+      color: #ffffff;
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+    }
+    .wishes-subtitle {
+      font-size: 0.95rem;
+      color: rgba(191,224,255,0.6);
+      font-style: italic;
+      margin-bottom: 1.2rem;
+    }
+    .scratch-badge {
+      display: inline-block;
+      font-size: 0.78rem;
+      letter-spacing: 0.15em;
+      color: var(--gold);
+      border-top: 1px solid rgba(255,215,0,0.3);
+      border-bottom: 1px solid rgba(255,215,0,0.3);
+      padding: 0.4rem 1.4rem;
+      margin: 0.5rem 0 1.5rem;
+    }
+    .scratch-card-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+    .scratch-label {
+      color: var(--gold);
+      font-size: 0.85rem;
+      margin-bottom: 0.6rem;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+      font-family: 'Playfair Display', serif;
+    }
+
+    /* ===== REASONS SECTION (HEART GRID) ===== */
+    .hearts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+      justify-items: center;
+    }
+
+    .heart-card {
+      position: relative;
+      width: 220px;
+      height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+      cursor: pointer;
+    }
+
+    .heart-card:hover {
+      transform: translateY(-8px) scale(1.05);
+      filter: drop-shadow(0 10px 20px rgba(255, 215, 0, 0.25));
+    }
+
+    .heart-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      filter: drop-shadow(0 6px 15px rgba(3, 9, 20, 0.5));
+    }
+
+    .heart-svg path {
+      transition: all var(--transition);
+    }
+
+    .heart-card:hover .heart-svg path {
+      stroke: var(--gold);
+      stroke-width: 1.1;
+      filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.4));
+    }
+
+    .heart-card:hover .heart-text {
+      color: var(--white);
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+    }
+
+    .heart-text {
+      position: absolute;
+      z-index: 2;
+      width: 72%;
+      height: 60%;
+      top: 16%;
+      left: 14%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 10px;
+      box-sizing: border-box;
+      font-family: 'Lato', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      line-height: 1.4;
+      color: rgba(240, 244, 252, 0.9);
+      user-select: none;
+      word-wrap: break-word;
+      overflow: hidden;
+      transition: all var(--transition);
+    }
+
+    /* Small pulse micro-animation on hover */
+    .heart-card:hover {
+      animation: heartbeat-mini 1.2s ease-in-out infinite;
+    }
+
+    @keyframes heartbeat-mini {
+      0%, 100% { transform: translateY(-8px) scale(1.05); }
+      50% { transform: translateY(-8px) scale(1.1); }
+    }
+
+    /* Acrostic Poem Typewriter & Quill cursor */
+    .poem-quill {
+      display: inline-block;
+      font-size: 1.6rem;
+      animation: quillMove 0.6s infinite alternate;
+      vertical-align: middle;
+      margin-left: 6px;
+      transform-origin: bottom right;
+      pointer-events: none;
+    }
+    @keyframes quillMove {
+      0% { transform: rotate(0deg) translateY(0); }
+      100% { transform: rotate(-25deg) translateY(-5px); }
+    }
+
+    /* Future Timeline Layout */
+    .future-timeline {
+      position: relative;
+      padding-left: 2rem;
+      margin-top: 2rem;
+    }
+    .future-timeline::before {
+      content: '';
+      position: absolute;
+      left: 8px;
+      top: 10px; bottom: 10px;
+      width: 2px;
+      background: linear-gradient(180deg, var(--gold), var(--glow), transparent);
+    }
+    .future-step {
+      position: relative;
+      margin-bottom: 2.5rem;
+      padding-left: 1.5rem;
+    }
+    .future-step::before {
+      content: '♥';
+      position: absolute;
+      left: -2rem;
+      top: 4px;
+      font-size: 1.3rem;
+      color: var(--gold);
+      background: var(--navy);
+      padding: 0 4px;
+      z-index: 2;
+    }
+    .future-step-header {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 0.5rem;
+    }
+    .future-step-icon {
+      font-size: 1.8rem;
+      filter: drop-shadow(0 0 5px rgba(255,215,0,0.3));
+    }
+    .future-step-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      color: var(--star);
+      font-weight: 700;
+    }
+    .future-step-desc {
+      font-size: 0.95rem;
+      line-height: 1.65;
+      color: rgba(240,244,2fc,0.8);
+    }
+
+    /* Mobile responsive adjustments for overrides */
+    @media (max-width: 768px) {
+      .romantic-grid, .scratch-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1.2rem !important;
+      }
+      .letter-paper {
+        padding: 2.2rem 1.6rem !important;
+        font-size: 1.25rem !important;
+        line-height: 1.9rem !important;
+        min-height: 480px !important;
+      }
+      .letter-paper::before {
+        inset: 8px !important;
+      }
+      .co-decor {
+        width: 32px !important; height: 32px !important;
+      }
+      .co-top-left { top: 10px !important; left: 10px !important; }
+      .co-top-right { top: 10px !important; right: 10px !important; }
+      .co-bottom-left { bottom: 10px !important; left: 10px !important; }
+      .co-bottom-right { bottom: 10px !important; right: 10px !important; }
+    }
+
+    /* Wishes Card Sparkles */
+    @keyframes cardBurst {
+      0% { transform: translate(-50%, -50%) scale(0.3) rotate(0deg); opacity: 0; }
+      15% { opacity: 1; }
+      100% { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1.3) rotate(var(--rot)); opacity: 0; }
+    }
+
+    /* Mobile (Phone) Optimization Overrides */
+    @media (max-width: 480px) {
+      .main {
+        padding: 1.2rem 0.8rem !important;
+      }
+      .login-card {
+        padding: 2.2rem 1.5rem !important;
+      }
+      .login-title {
+        font-size: 2.4rem !important;
+      }
+      .login-heart {
+        font-size: 2.8rem !important;
+      }
+      #login-page {
+        overflow-y: auto !important;
+        align-items: flex-start !important;
+        padding: 2rem 1rem !important;
+      }
+      .navbar {
+        padding: 0 1rem !important;
+      }
+      .navbar-brand {
+        font-size: 1.25rem !important;
+      }
+      .logout-btn {
+        padding: 0.4rem 0.8rem !important;
+        font-size: 0.75rem !important;
+      }
+      .btn-yes-sweet, .btn-yes-threat {
+        padding: 1rem 1.2rem !important;
+        font-size: 0.95rem !important;
+        width: 100% !important;
+        max-width: 290px !important;
+        box-sizing: border-box !important;
+        white-space: normal !important;
+        line-height: 1.4 !important;
+      }
+      .answer-btns {
+        width: 100% !important;
+        align-items: center !important;
+      }
+      .letter-paper {
+        padding: 2rem 1.2rem !important;
+        font-size: 1.15rem !important;
+        line-height: 1.8rem !important;
+        overflow-wrap: break-word;
+      }
+      .future-timeline {
+        padding-left: 1.5rem !important;
+      }
+      .future-step::before {
+        left: -1.75rem !important;
+      }
+      .acrostic-container {
+        padding: 1.2rem 0.8rem !important;
+      }
+      .acrostic-letter {
+        font-size: 1.6rem !important;
+        width: 25px !important;
+      }
+      .acrostic-line {
+        font-size: 0.88rem !important;
+      }
+      .hearts-grid {
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 1rem;
+      }
+      .heart-card {
+        width: 170px;
+        height: 156px;
+      }
+      .heart-text {
+        font-size: 0.72rem;
+        line-height: 1.3;
+        width: 70%;
+        height: 58%;
+        top: 17%;
+        left: 15%;
+      }
+      .heart-card:hover {
+        transform: translateY(-4px) scale(1.03);
+      }
+      @keyframes heartbeat-mini {
+        0%, 100% { transform: translateY(-4px) scale(1.03); }
+        50% { transform: translateY(-4px) scale(1.06); }
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SPARKLE CANVAS -->
+<canvas id="sparkle-canvas"></canvas>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- LOGIN PAGE -->
+<div id="login-page">
+  <div class="login-ring ring-1"></div>
+  <div class="login-ring ring-2"></div>
+  
+  <div class="login-card">
+    <div class="login-sparkle sparkle-1">✨</div>
+    <div class="login-sparkle sparkle-2">✨</div>
+    <div class="login-sparkle sparkle-3">⭐</div>
+    <div class="login-sparkle sparkle-4">⭐</div>
+    
+    <div class="login-heart">💙</div>
+    <h1 class="login-title">For You</h1>
+    <p class="login-subtitle">Un petit coin secret rempli d'étincelles,<br>créé uniquement pour toi...</p>
+    <div class="login-input-group">
+      <input type="password" id="password-input" class="login-input" placeholder="Entrer le mot de passe..." onkeydown="if(event.key==='Enter') checkLogin()"/>
+    </div>
+    <button class="login-btn" onclick="checkLogin()">Unlock ✦</button>
+    <div class="login-error" id="login-error">Mot de passe incorrect... Essayez encore 💙</div>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-brand">
+    <span class="heart-icon">💙</span>
+    Mon Cher Petit Cœur
+  </div>
+  <div class="navbar-right">
+    <button class="logout-btn" onclick="performLogout()">Déconnexion</button>
+    <button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-title">✦ CHAPTERS OF MY HEART</div>
+
+  <button class="nav-item active" onclick="showSection('letter', this)">
+    <span class="icon">✉️</span> Letter
+  </button>
+  <button class="nav-item" onclick="showSection('promise', this)">
+    <span class="icon">🕊️</span> My Wishes
+  </button>
+  <button class="nav-item" onclick="showSection('qualities', this)">
+    <span class="icon">✨</span> Your Qualities
+  </button>
+  <button class="nav-item" onclick="showSection('finebo', this)">
+    <span class="icon">👑</span> Fine Boy
+  </button>
+  <button class="nav-item" onclick="showSection('memories', this)">
+    <span class="icon">🌌</span> Our Memories
+  </button>
+  <button class="nav-item" onclick="showSection('reasons', this)">
+    <span class="icon">🌟</span> Why I Adore You
+  </button>
+  <button class="nav-item" onclick="showSection('poem', this)">
+    <span class="icon">📜</span> A Poem for You
+  </button>
+
+
+  <div class="sidebar-divider"></div>
+
+  <button class="nav-item" onclick="showSection('proposal', this)">
+    <span class="icon">❓</span> Will You Be Mine?
+  </button>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main" id="main">
+
+  <!-- ===== LETTER ===== -->
+  <section id="section-letter" class="section active">
+    <div class="glass-card">
+      <div class="section-header">
+        <div class="section-tag">✦ Chapitre I</div>
+        <h1 class="section-title">Une Lettre Sortie de mon Cœur</h1>
+        <p class="section-subtitle">Des mots que je n'ose exprimer qu'à l'écrit</p>
+      </div>
+      <div class="divider-line"></div>
+
+      <div class="letter-paper">
+        <div class="co-decor co-top-left"></div>
+        <div class="co-decor co-top-right"></div>
+        <div class="co-decor co-bottom-left"></div>
+        <div class="co-decor co-bottom-right"></div>
+        
+        <!-- Date and wax seal removed per user request -->
+        
+        <div class="letter-text" id="typewriter-text"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SPECIAL PROMISE (SCRATCH CARDS) ===== -->
+  <section id="section-promise" class="section">
+    <div class="glass-card">
+      <div class="section-header">
+        <div class="section-tag">✦ Chapitre II</div>
+        <h2 class="section-title">My Wishes For You</h2>
+        <p class="section-subtitle">Gratte chaque carte pour révéler</p>
+      </div>
+      <div class="divider-line"></div>
+
+      <div class="scratch-grid">
+        <!-- Promise 1 -->
+        <div class="scratch-card-wrapper">
+          <div class="scratch-card">
+            <canvas class="scratch-canvas" data-grad-start="#e8c88c" data-grad-end="#b59450" data-text="Gratte ici ✦"></canvas>
+            <div class="scratch-card-content">
+              <div class="scratch-card-icon">🕊️</div>
+              <p class="scratch-card-text">Que nos cœurs battent à l'unisson pour vivre en parfaite harmonie, main dans la main.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Promise 2 -->
+        <div class="scratch-card-wrapper">
+          <div class="scratch-card">
+            <canvas class="scratch-canvas" data-grad-start="#a8e2bc" data-grad-end="#6eb884" data-text="Gratte ici ✦"></canvas>
+            <div class="scratch-card-content">
+              <div class="scratch-card-icon">💖</div>
+              <p class="scratch-card-text">T'offrir une sincérité absolue et une transparence totale à chaque instant.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Promise 3 -->
+        <div class="scratch-card-wrapper">
+          <div class="scratch-card">
+            <canvas class="scratch-canvas" data-grad-start="#d5b4f0" data-grad-end="#9b73c4" data-text="Gratte ici ✦"></canvas>
+            <div class="scratch-card-content">
+              <div class="scratch-card-icon">🚀</div>
+              <p class="scratch-card-text">Croire en nous et porter ensemble la réussite de tous nos plus beaux projets.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Promise 4 -->
+        <div class="scratch-card-wrapper">
+          <div class="scratch-card">
+            <canvas class="scratch-canvas" data-grad-start="#facc96" data-grad-end="#cfa05d" data-text="Gratte ici ✦"></canvas>
+            <div class="scratch-card-content">
+              <div class="scratch-card-icon">💬</div>
+              <p class="scratch-card-text">Privilégier toujours la douceur et la bonne communication entre nous.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Promise 5 -->
+        <div class="scratch-card-wrapper">
+          <div class="scratch-card">
+            <canvas class="scratch-canvas" data-grad-start="#abd3f7" data-grad-end="#74a2cc" data-text="Gratte ici ✦"></canvas>
+            <div class="scratch-card-content">
+              <div class="scratch-card-icon">🤝</div>
+              <p class="scratch-card-text">Être ta plus douce confidente, compréhensive et éternellement à ton écoute.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Promise 6 -->
+        <div class="scratch-card-wrapper">
+          <div class="scratch-card">
+            <canvas class="scratch-canvas" data-grad-start="#fae8ab" data-grad-end="#cca75e" data-text="Gratte ici ✦"></canvas>
+            <div class="scratch-card-content">
+              <div class="scratch-card-icon">🌱</div>
+              <p class="scratch-card-text">Prendre soin de nous, cultiver notre complicité et grandir ensemble jour après jour.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== QUALITIES (FLIP CARDS) ===== -->
+  <section id="section-qualities" class="section">
+    <div class="glass-card">
+      <div class="section-header">
+        <div class="section-tag">✦ Chapitre III</div>
+        <h2 class="section-title">Tes Merveilleuses Qualités</h2>
+        <p class="section-subtitle">Clique sur les cartes pour voir ce qu'elles cachent...</p>
+      </div>
+      <div class="divider-line"></div>
+
+      <div class="flip-grid">
+        <!-- Quality 1 -->
+        <div class="flip-card q-1" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <div class="icon">🧠</div>
+              <h3>Esprit Brillant</h3>
+              <div class="hint">Clique-moi</div>
+            </div>
+            <div class="flip-card-back">
+              <h3>Esprit Brillant</h3>
+              <p>Ton intelligence se lit dans la façon dont tu analyses les choses et comprends chaque situation avec simplicité.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quality 2 -->
+        <div class="flip-card q-2" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <div class="icon">💛</div>
+              <h3>Bienveillance</h3>
+              <div class="hint">Clique-moi</div>
+            </div>
+            <div class="flip-card-back">
+              <h3>Bienveillance</h3>
+              <p>Ta bienveillance est naturelle et ta gentillesse apporte une vraie douceur à tous nos moments partagés.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quality 3 -->
+        <div class="flip-card q-3" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <div class="icon">🌊</div>
+              <h3>Force Tranquille</h3>
+              <div class="hint">Clique-moi</div>
+            </div>
+            <div class="flip-card-back">
+              <h3>Force Tranquille</h3>
+              <p>Tu as une force tranquille en toi, un calme profond et rassurant qui m'apaise à chaque instant.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quality 4 -->
+        <div class="flip-card q-4" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <div class="icon">⚡</div>
+              <h3>Courage Admirable</h3>
+              <div class="hint">Clique-moi</div>
+            </div>
+            <div class="flip-card-back">
+              <h3>Courage Admirable</h3>
+              <p>Tu affrontes les épreuves et les défis avec un courage incroyable, sans jamais baisser les bras.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quality 5 -->
+        <div class="flip-card q-5" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <div class="icon">🎨</div>
+              <h3>Originalité</h3>
+              <div class="hint">Clique-moi</div>
+            </div>
+            <div class="flip-card-back">
+              <h3>Originalité</h3>
+              <p>Tu es original et fidèle à toi-même, tu as cette touche unique que personne d'autre ne possède.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quality 6 -->
+        <div class="flip-card q-6" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <div class="icon">🌙</div>
+              <h3>Présence Apaisante</h3>
+              <div class="hint">Clique-moi</div>
+            </div>
+            <div class="flip-card-back">
+              <h3>Présence Apaisante</h3>
+              <p>Être à tes côtés amène un calme intérieur incroyable et fait s'envoler tous mes tracas.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quality 7 -->
+        <div class="flip-card q-7" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <div class="icon">✨</div>
+              <h3>Charme Naturel</h3>
+              <div class="hint">Clique-moi</div>
+            </div>
+            <div class="flip-card-back">
+              <h3>Charme Naturel</h3>
+              <p>Ton charme réside dans ton authenticité et cette façon unique que tu as d'illuminer tout autour de toi.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quality 8 -->
+        <div class="flip-card q-8" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <div class="icon">😄</div>
+              <h3>Joie de Vivre</h3>
+              <div class="hint">Clique-moi</div>
+            </div>
+            <div class="flip-card-back">
+              <h3>Joie de Vivre</h3>
+              <p>Rien ne vaut l’éclat de ta joie et ton rire communicatif qui réchauffent mon cœur à chaque instant.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FINE BOY (PHOTOS & VIDEOS ALBUM) ===== -->
+  <section id="section-finebo" class="section">
+    <div class="glass-card">
+      <div class="section-header">
+        <div class="section-tag">✦ Chapitre IV</div>
+        <h2 class="section-title">Fine Boy Album 👑</h2>
+        <p class="section-subtitle">Parce qu'il faut l'avouer... tu es incroyablement beau</p>
+      </div>
+      <div class="divider-line"></div>
+
+      <div class="gallery-grid">
+        <!-- Photo 1 -->
+        <div class="gallery-item">
+          <img src="fine_boy_1.jpg" alt="Certified Fine Boy 1" class="gallery-image">
+          <div class="gallery-desc">Ce regard qui me fait craquer... 💙</div>
+        </div>
+
+        <!-- Photo 2 -->
+        <div class="gallery-item">
+          <img src="fine_boy_2.jpg" alt="Certified Fine Boy 2" class="gallery-image">
+          <div class="gallery-desc">Ton charme au naturel hyper craquant.</div>
+        </div>
+
+        <!-- Video 1 -->
+        <div class="gallery-item">
+          <video src="fine_boy_video.mov" controls class="gallery-image" poster="fine_boy_1.jpg"></video>
+          <div class="gallery-desc">C'est comme un ange qui me fait fondre</div>
+        </div>
+
+        <!-- Photo 3 -->
+        <div class="gallery-item">
+          <img src="fine_boy_3.jpg" alt="Certified Fine Boy 3" class="gallery-image">
+          <div class="gallery-desc">Le style à l'état pur, Certified Fine Boy 😎</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== NOS SOUVENIRS (WORDS THAT MARKED HER) ===== -->
+  <section id="section-memories" class="section">
+    <div class="glass-card">
+      <div class="section-header">
+        <div class="section-tag">✦ Chapitre V</div>
+        <h2 class="section-title">Ces Mots Qui M'ont Marquée</h2>
+        <p class="section-subtitle" style="font-size: 1.05rem; line-height: 1.6; max-width: 650px; margin-top: 0.8rem; font-style: italic; color: var(--star);">
+          Tu utilises toujours des mots qui me vont droit au cœur même si je ne te le dis pas. Je prends un réel plaisir à garder précieusement ces moments tendres de souvenir que tu me donnes.
+        </p>
+      </div>
+      <div class="divider-line"></div>
+
+      <div class="memories-container">
+        <!-- Group 1 -->
+        <div class="memory-group">
+          <div class="bubble-wrapper left">
+            <div class="message-bubble">
+              <p><span class="quote-icon">«</span> Ce que je compte dire/faire un truc qui pourrait t’atteindre ça serait quelque chose qui pourrait te plaire, te donner le sourire. <span class="quote-icon">»</span></p>
+            </div>
+          </div>
+          <div class="memory-connector"></div>
+          <div class="bubble-wrapper right">
+            <div class="message-bubble">
+              <p>Je ne te l’ai jamais dit, mais cela m’a profondément touchée et fait chaud au cœur cette nuit-là... 🙂↕️</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Group 2 -->
+        <div class="memory-group">
+          <div class="bubble-wrapper left">
+            <div class="message-bubble">
+              <p><span class="quote-icon">«</span> Une distance entre la terre et la lune ?😂😂😂réduis la si tu peux <span class="quote-icon">»</span></p>
+            </div>
+          </div>
+          <div class="memory-connector"></div>
+          <div class="bubble-wrapper right">
+            <div class="message-bubble">
+              <p>Je t’avais demandé le nombre de pas entre la haine et l’amour... Ta réponse à ce petit défi m'a tellement fait rire ! 😭</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Group 3 -->
+        <div class="memory-group">
+          <div class="bubble-wrapper left">
+            <div class="message-bubble">
+              <p><span class="quote-icon">«</span> Comment peux-t’elle ne pas être agréable quand la première chose que j’ai vu au matin fut ton magnifique visage.. <span class="quote-icon">»</span></p>
+            </div>
+          </div>
+          <div class="memory-connector"></div>
+          <div class="bubble-wrapper right">
+            <div class="message-bubble">
+              <p>Je t’avais tout simplement demandé comment s'était passée ta journée... Regarde comment tu t'y prends pour me faire craquer ! 😔</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Group 4 -->
+        <div class="memory-group">
+          <div class="bubble-wrapper left">
+            <div class="message-bubble">
+              <p><span class="quote-icon">«</span> Ce qui m’attire chez toi, c’est surtout ton énergie.<br>Tu dégages une joie de vivre naturelle, un humour spontané qui rend les échanges interessants.. et derrière tout ça on sent une vraie intelligence dans ta manière de parler et de comprendre les choses. <span class="quote-icon">»</span></p>
+            </div>
+          </div>
+          <div class="memory-connector"></div>
+          <div class="bubble-wrapper right">
+            <div class="message-bubble">
+              <p>Recevoir un si beau témoignage alors qu’on venait à peine de se connaître m’a fait un bien immense et m'a touchée en plein cœur... 🙂↕️</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Group 5 -->
+        <div class="memory-group">
+          <div class="bubble-wrapper left">
+            <div class="message-bubble">
+              <p><span class="quote-icon">«</span> Donc restons ici dans ce monde et vivons selon l’adage « ils vécurent heureux et eurent beaucoup d’enfants. »🙂🤭 <span class="quote-icon">»</span></p>
+            </div>
+          </div>
+          <div class="memory-connector"></div>
+          <div class="bubble-wrapper right">
+            <div class="message-bubble">
+              <p>Et c’est précisément à ce moment-là que j'ai commencé à imaginer un futur à tes côtés, même si j'avais encore trop peur de me dévoiler... 😔</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Group 6 -->
+        <div class="memory-group">
+          <div class="bubble-wrapper left">
+            <div class="message-bubble">
+              <p><span class="quote-icon">«</span> Bahh notre discussion etait subitement devenue amusante. Qu’est-ce que tu veux..? La providence a voulu que nous soyons proches 🤭 et que tu finisses par tomber amoureuse de moi, 🙂↕️ <span class="quote-icon">»</span></p>
+            </div>
+          </div>
+          <div class="memory-connector"></div>
+          <div class="bubble-wrapper right">
+            <div class="message-bubble">
+              <p>Et bien écoute, félicitations mon cher... La providence a bien fait les choses, tu m'as complètement eue ! 😭</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Group 7 -->
+        <div class="memory-group">
+          <div class="bubble-wrapper left">
+            <div class="message-bubble">
+              <p><span class="quote-icon">«</span> Imagine je me reveille un jour, et je vois ce visage à mes côtés. Imagine 🥲 <span class="quote-icon">»</span></p>
+            </div>
+          </div>
+          <div class="memory-connector"></div>
+          <div class="bubble-wrapper right">
+            <div class="message-bubble">
+              <p>Tes doux compliments boostent ma confiance et mon sourire chaque jour (surtout avec mon petit côté narcissique !) 😭</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Group 8 -->
+        <div class="memory-group">
+          <div class="bubble-wrapper left">
+            <div class="message-bubble">
+              <p><span class="quote-icon">«</span> Explique moi pourquoi tout au long de la video, jetais entrain de sourir ? Explique moi je comprends pas. Tu joues avec mes emotions ? <span class="quote-icon">»</span></p>
+            </div>
+          </div>
+          <div class="memory-connector"></div>
+          <div class="bubble-wrapper right">
+            <div class="message-bubble">
+              <p>Pour le coup, c’est bien toi qui as commencé à faire chavirer mes émotions, tu trouves toujours les mots parfaits pour chaque situation... 😭</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Group 9 -->
+        <div class="memory-group">
+          <div class="bubble-wrapper left">
+            <div class="message-bubble">
+              <p><span class="quote-icon">«</span> Tu es la première personne à qui je parle au réveil. J’aime te parler. Je prends du plaisir à le faire. Je guette ton msg toutes les secondes et je me dépêche de te répondre.. <span class="quote-icon">»</span></p>
+            </div>
+          </div>
+          <div class="memory-connector"></div>
+          <div class="bubble-wrapper right">
+            <div class="message-bubble">
+              <p>Qui pourrait résister à une si belle déclaration ? En tout cas, mon cœur a capitulé direct... 🥹</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Group 10 -->
+        <div class="memory-group">
+          <div class="bubble-wrapper left">
+            <div class="message-bubble">
+              <p><span class="quote-icon">«</span> « mon cœur » qui me donne des papillons dans le ventre. Je suis vraiment faible 🙂↕️ <span class="quote-icon">»</span></p>
+            </div>
+          </div>
+          <div class="memory-connector"></div>
+          <div class="bubble-wrapper right">
+            <div class="message-bubble">
+              <p>Et depuis ce jour-là, je prends un plaisir immense à t’appeler "mon cœur", juste pour savoir que cela te fait vibrer... 🥹</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Group 11 -->
+        <div class="memory-group">
+          <div class="bubble-wrapper left">
+            <div class="message-bubble">
+              <p><span class="quote-icon">«</span> Une sainte au soleil, une tempête à minuit. <span class="quote-icon">»</span></p>
+            </div>
+          </div>
+          <div class="memory-connector"></div>
+          <div class="bubble-wrapper right">
+            <div class="message-bubble">
+              <p>Tu donnes de bien sombres idées à la petite fille sage que je prétends être... 😔</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider-line"></div>
+
+      <p style="font-size: 1.1rem; line-height: 1.7; text-align: center; max-width: 680px; margin: 2rem auto 0; font-style: italic; color: var(--gold); text-shadow: 0 0 10px rgba(255,215,0,0.2);">
+        "Bref, tout ça pour te dire que je n’ai négligé aucun détail depuis le début. C’était juste la peur qui me faisait taire ou adopter certains comportements vis-à-vis de toi... Et aujourd'hui, je suis enfin prête à tout assumer."
+      </p>
+    </div>
+  </section>
+
+  <!-- ===== WHY I LOVE YOU (ROMANTIC GRID) ===== -->
+  <section id="section-reasons" class="section">
+    <div class="glass-card">
+      <div class="section-header">
+        <div class="section-tag">✦ Chapitre VI</div>
+        <h2 class="section-title">Pourquoi je t'adore</h2>
+        <p class="section-subtitle">Des évidences que mon cœur a saisies sans poser de questions</p>
+      </div>
+      <div class="divider-line"></div>
+
+      <div class="hearts-grid">
+        <!-- Heart 1 -->
+        <div class="heart-card">
+          <svg class="heart-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="heartGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="rgba(14, 31, 66, 0.85)" />
+                <stop offset="100%" stop-color="rgba(8, 18, 41, 0.95)" />
+              </linearGradient>
+              <linearGradient id="heartGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="rgba(20, 45, 94, 0.85)" />
+                <stop offset="100%" stop-color="rgba(14, 31, 66, 0.95)" />
+              </linearGradient>
+            </defs>
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+                  fill="url(#heartGrad1)" 
+                  stroke="rgba(255, 215, 0, 0.45)" 
+                  stroke-width="0.8"/>
+          </svg>
+          <div class="heart-text">
+            J'ai essayé de rester sans te parler, mais je n'y suis pas arrivée... 💙
+          </div>
+        </div>
+
+        <!-- Heart 2 -->
+        <div class="heart-card">
+          <svg class="heart-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+                  fill="url(#heartGrad2)" 
+                  stroke="rgba(84, 155, 242, 0.4)" 
+                  stroke-width="0.8"/>
+          </svg>
+          <div class="heart-text">
+            Pour notre incroyable complicité qui grandit de jour en jour. 🤝
+          </div>
+        </div>
+
+        <!-- Heart 3 -->
+        <div class="heart-card">
+          <svg class="heart-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+                  fill="url(#heartGrad1)" 
+                  stroke="rgba(255, 215, 0, 0.45)" 
+                  stroke-width="0.8"/>
+          </svg>
+          <div class="heart-text">
+            Ta gentillesse naturelle qui se voit dans chacun de tes gestes. 💛
+          </div>
+        </div>
+
+        <!-- Heart 4 -->
+        <div class="heart-card">
+          <svg class="heart-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+                  fill="url(#heartGrad2)" 
+                  stroke="rgba(84, 155, 242, 0.4)" 
+                  stroke-width="0.8"/>
+          </svg>
+          <div class="heart-text">
+            Pour cette douceur infinie dans ta voix qui me fait fondre. 🫠
+          </div>
+        </div>
+
+        <!-- Heart 5 -->
+        <div class="heart-card">
+          <svg class="heart-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+                  fill="url(#heartGrad1)" 
+                  stroke="rgba(255, 215, 0, 0.45)" 
+                  stroke-width="0.8"/>
+          </svg>
+          <div class="heart-text">
+            Pour ton honnêteté et ta sincérité qui me rassurent. 💎
+          </div>
+        </div>
+
+        <!-- Heart 6 -->
+        <div class="heart-card">
+          <svg class="heart-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+                  fill="url(#heartGrad2)" 
+                  stroke="rgba(84, 155, 242, 0.4)" 
+                  stroke-width="0.8"/>
+          </svg>
+          <div class="heart-text">
+            Pour ton rire communicatif qui illumine ma journée. 😄
+          </div>
+        </div>
+
+        <!-- Heart 7 -->
+        <div class="heart-card">
+          <svg class="heart-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+                  fill="url(#heartGrad1)" 
+                  stroke="rgba(255, 215, 0, 0.45)" 
+                  stroke-width="0.8"/>
+          </svg>
+          <div class="heart-text">
+            Parce que parler avec toi rend tout plus léger et plus beau. 🌌
+          </div>
+        </div>
+
+        <!-- Heart 8 -->
+        <div class="heart-card">
+          <svg class="heart-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+                  fill="url(#heartGrad2)" 
+                  stroke="rgba(84, 155, 242, 0.4)" 
+                  stroke-width="0.8"/>
+          </svg>
+          <div class="heart-text">
+            Tu es cette pièce manquante qui donne un sens nouveau à ma vie. 🧩
+          </div>
+        </div>
+
+        <!-- Heart 9 -->
+        <div class="heart-card">
+          <svg class="heart-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+                  fill="url(#heartGrad1)" 
+                  stroke="rgba(255, 215, 0, 0.45)" 
+                  stroke-width="0.8"/>
+          </svg>
+          <div class="heart-text">
+            Pour ta force tranquille qui m'aide à avancer avec confiance. ⚓
+          </div>
+        </div>
+
+        <!-- Heart 10 -->
+        <div class="heart-card">
+          <svg class="heart-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+                  fill="url(#heartGrad2)" 
+                  stroke="rgba(84, 155, 242, 0.4)" 
+                  stroke-width="0.8"/>
+          </svg>
+          <div class="heart-text">
+            Parce que ta présence me pousse à être une meilleure version de moi-même. 🚀
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ACROSTIC POEM ===== -->
+  <section id="section-poem" class="section">
+    <div class="glass-card">
+      <div class="section-header">
+        <div class="section-tag">✦ Chapitre VII</div>
+        <h2 class="section-title">Un Poème pour Toi</h2>
+        <p class="section-subtitle">Lis les premières lettres verticalement...</p>
+      </div>
+      <div class="divider-line"></div>
+
+      <div class="acrostic-container">
+        <!-- M -->
+        <div class="acrostic-line">
+          <div class="acrostic-letter">M</div>
+          <div class="acrostic-phrase" id="poem-line-1"></div>
+        </div>
+        <!-- A -->
+        <div class="acrostic-line">
+          <div class="acrostic-letter">A</div>
+          <div class="acrostic-phrase" id="poem-line-2"></div>
+        </div>
+        <!-- K -->
+        <div class="acrostic-line">
+          <div class="acrostic-letter">K</div>
+          <div class="acrostic-phrase" id="poem-line-3"></div>
+        </div>
+        <!-- A -->
+        <div class="acrostic-line">
+          <div class="acrostic-letter">A</div>
+          <div class="acrostic-phrase" id="poem-line-4"></div>
+        </div>
+        <!-- T -->
+        <div class="acrostic-line">
+          <div class="acrostic-letter">T</div>
+          <div class="acrostic-phrase" id="poem-line-5"></div>
+        </div>
+        <!-- Y -->
+        <div class="acrostic-line">
+          <div class="acrostic-letter">Y</div>
+          <div class="acrostic-phrase" id="poem-line-6"></div>
+        </div>
+
+        <!-- Space between first and last name -->
+        <div class="acrostic-space"></div>
+
+        <!-- F -->
+        <div class="acrostic-line">
+          <div class="acrostic-letter">F</div>
+          <div class="acrostic-phrase" id="poem-line-7"></div>
+        </div>
+        <!-- A -->
+        <div class="acrostic-line">
+          <div class="acrostic-letter">A</div>
+          <div class="acrostic-phrase" id="poem-line-8"></div>
+        </div>
+        <!-- L -->
+        <div class="acrostic-line">
+          <div class="acrostic-letter">L</div>
+          <div class="acrostic-phrase" id="poem-line-9"></div>
+        </div>
+        <!-- L -->
+        <div class="acrostic-line">
+          <div class="acrostic-letter">L</div>
+          <div class="acrostic-phrase" id="poem-line-10"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PROPOSAL (WILL YOU BE MINE) ===== -->
+  <section id="section-proposal" class="section">
+    <div class="glass-card">
+      <div class="section-header">
+        <div class="section-tag">✦ La Grande Question</div>
+        <h2 class="section-title">Will you be my love?</h2>
+      </div>
+      <div class="divider-line"></div>
+
+      <div class="proposal-center">
+        <!-- Overlapping custom vector hearts layout replacing the red question mark -->
+        <div class="proposal-heart">
+          <svg width="120" height="120" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="glow-filter" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="1.5" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+            <!-- Blue Heart -->
+            <path d="M11 25.5l-1-0.9C5 20.3 2 17.5 2 14c0-2.8 2.2-5 5-5 1.6 0 3.1 0.7 4 1.9C11.9 9.7 13.4 9 15 9c2.8 0 5 2.2 5 5 0 3.5-3 6.3-8 10.6l-1 0.9z" 
+                  fill="rgba(49, 108, 216, 0.2)" 
+                  stroke="#549bf2" 
+                  stroke-width="1"
+                  filter="url(#glow-filter)" />
+            <!-- Gold Heart (offset slightly to the right and bottom) -->
+            <path d="M21 21.5l-0.8-0.7C16.2 16.8 13.8 14.3 13.8 11.2c0-2.5 2-4.5 4.5-4.5 1.4 0 2.8 0.6 3.6 1.7 0.8-1.1 2.2-1.7 3.6-1.7 2.5 0 4.5 2 4.5 4.5 0 3.1-2.4 5.6-6.4 9.6l-0.8 0.7z" 
+                  fill="rgba(255, 215, 0, 0.15)" 
+                  stroke="#ffd700" 
+                  stroke-width="0.8"
+                  filter="url(#glow-filter)" />
+          </svg>
+        </div>
+
+        <p class="big-question">
+          "Will you be by my side forever and ever and always?"
+        </p>
+
+        <div class="answer-btns">
+          <!-- Option 1: Sweet Yes -->
+          <button class="btn-yes-sweet" onclick="onYesSweet()">
+            Oui, mille fois oui ! 💙
+          </button>
+          
+          <!-- Option 2: Threat Yes -->
+          <button class="btn-yes-threat" onclick="onYesThreat()">
+            Oui (sinon je te kidnappe et t'oblige à m'aimer !) 🦖
+          </button>
+
+          <!-- Hidden No button just in case, but unused to guide to Yes -->
+          <button class="btn-no"></button>
+        </div>
+
+        <div class="response-msg" id="response-msg"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // ===== LOGIN CHECK =====
+  const correctPassword = "makaty";
+  
+  // Check if session exists in localStorage
+  if (localStorage.getItem("makaty_login") === "true") {
+    document.getElementById("login-page").classList.add("hidden");
+  }
+
+  function checkLogin() {
+    const inputVal = document.getElementById("password-input").value.trim().toLowerCase();
+    const errorEl = document.getElementById("login-error");
+    
+    if (inputVal === correctPassword) {
+      localStorage.setItem("makaty_login", "true");
+      document.getElementById("login-page").classList.add("hidden");
+      // Trigger typewriter effect once logged in
+      setTimeout(startTypewriter, 800);
+    } else {
+      errorEl.style.display = "block";
+      errorEl.style.animation = 'none';
+      errorEl.offsetHeight; /* trigger reflow */
+      errorEl.style.animation = null;
+      errorEl.style.animation = "shake 0.4s ease-in-out";
+    }
+  }
+
+  function performLogout() {
+    localStorage.removeItem("makaty_login");
+    document.getElementById("password-input").value = "";
+    document.getElementById("login-error").style.display = "none";
+    document.getElementById("login-page").classList.remove("hidden");
+  }
+
+  // ===== TYPEWRITER FOR HANDWRITTEN LETTER =====
+  const letterString = `Mon cher petit cœur,
+
+Tout a commencé par de simples échanges, presque anodins. Puis au fil du temps, tu as réussi à briser la carapace derrière laquelle je me cachais pour me protéger. Tu es entré dans ma vie de façon inattendue, bouleversant doucement toutes les barrières et toutes les limites que je m’étais imposées.
+
+J’aime te parler, partager avec toi mes blagues les plus nulles juste pour avoir le bonheur d’entendre ton magnifique rire ou encore faire mes petits caprices simplement pour te saouler. Tu m’as attirée vers toi par ta sincérité, ton honnêteté, ta gentillesse et cette douceur qui me fait complètement fondre.
+
+Ta présence a tout changé en silence car depuis que tu es là, je vois les choses autrement. Tu m’aides à prendre du recul, à mieux comprendre certaines situations et à avancer avec plus de maturité. Et là je me sens incroyablement chanceuse de t’avoir à mes côtés.
+
+Je sais que je peux parfois être compliquée, que j’ai mes défauts comme tout le monde, mais avec toi j’ai envie de devenir une meilleure version de moi-même et de transformer tout ceci en de bonnes choses. Sache que tu mérites tout le bonheur du monde, toute la sérénité et tout l’amour que la vie peut offrir car tu possèdes un cœur en or.
+
+Sans jamais rien forcer, tu m’as donné envie de plonger avec toi dans les profondeurs d’un véritable amour sincère. J’ai envie de t’aimer de la plus belle des manières, avec respect, honnêteté, douceur et bienveillance, parce que ton bonheur compte désormais autant que le mien. Tu illumines mes journées, tu renforces ma confiance en moi et tu me rappelles chaque jour que le bonheur existe dans les choses les plus simples. Avec toi tout semble plus léger, plus beau. And life is definitely worth living with you by my side.
+
+Je me surprends à rêver d’un amour construit sur le respect, la communication, la confiance, le partage et le soutien mutuel avec toi. Tu es cette pièce manquante que je ne cherchais même pas, celle qui donne un sens nouveau à ma vie.
+
+Je n’ai peut-être pas grand-chose à t’offrir, mais je peux te donner ce que j’ai de plus précieux. Mon cœur. Il t’appartient entièrement et il est prêt à avancer à tes côtés, à franchir chaque étape de la vie, à surmonter chaque obstacle et à atteindre les plus beaux sommets avec toi.`;
+
+  let letterIndex = 0;
+  let typewriterStarted = false;
+
+  function startTypewriter() {
+    if (typewriterStarted) return;
+    typewriterStarted = true;
+    const txtContainer = document.getElementById("typewriter-text");
+    txtContainer.textContent = "";
+    
+    // Split by words to animate naturally
+    const words = letterString.split(" ");
+    let i = 0;
+    
+    function writeWord() {
+      if (i < words.length) {
+        txtContainer.textContent += (i === 0 ? "" : " ") + words[i];
+        i++;
+        // Adjust typing speed (randomized for a human touch)
+        setTimeout(writeWord, 100 + Math.random() * 120);
+      }
+    }
+    writeWord();
+  }
+
+  // ===== POEM TYPING WITH QUILL =====
+  const poemPhrases = [
+    "on quotidien a changé depuis que tu es là,",
+    "vec toi j'ai l'impression de me redécouvrir,",
+    "ilomètres de bonheur à vivre à tes côtés,",
+    "pprendre à te connaître est mon plus beau cadeau,",
+    "a douceur embellit mes journées,",
+    "eux fermés, je te fais entièrement confiance.",
+    // Space
+    "ace à l'avenir je n'ai plus peur de prendre des risques,",
+    "vec toi, chaque jour est une évidence,",
+    "e bonheur que je ressens avec toi est immense,",
+    "aissons nos cœurs écrire cette histoire ensemble. 💙"
+  ];
+
+  let poemStarted = false;
+  function startPoemTypewriter() {
+    if (poemStarted) return;
+    poemStarted = true;
+    
+    let lineIdx = 0;
+    
+    function typeLine() {
+      if (lineIdx < poemPhrases.length) {
+        const lineEl = document.getElementById("poem-line-" + (lineIdx + 1));
+        const phrase = poemPhrases[lineIdx];
+        let charIdx = 0;
+        
+        function typeChar() {
+          if (charIdx <= phrase.length) {
+            lineEl.innerHTML = phrase.slice(0, charIdx) + '<span class="poem-quill">🪶</span>';
+            charIdx++;
+            setTimeout(typeChar, 35 + Math.random() * 35);
+          } else {
+            // Remove quill from completed line
+            lineEl.innerHTML = phrase;
+            lineIdx++;
+            setTimeout(typeLine, 250);
+          }
+        }
+        typeChar();
+      }
+    }
+    typeLine();
+  }
+
+  // ===== SECTION NAVIGATION =====
+  function showSection(name, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    btn.classList.add('active');
+    
+    if (name === 'letter') {
+      startTypewriter();
+    }
+    
+    if (name === 'promise') {
+      // Initialize scratch canvases when opening the section
+      setTimeout(initScratchCards, 100);
+    }
+
+    if (name === 'poem') {
+      setTimeout(startPoemTypewriter, 100);
+    }
+
+    if (window.innerWidth <= 768) closeSidebar();
+  }
+
+  // ===== SIDEBAR TOGGLE =====
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('visible');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('visible');
+  }
+
+  // ===== PROPOSAL BUTTONS =====
+  function onYesSweet() {
+    triggerSuccess("sage décision mon cœur 💙");
+  }
+
+  function onYesThreat() {
+    triggerSuccess("tu pensais vraiment avoir le choix mon cœur ? 💙");
+  }
+
+  function triggerSuccess(messageText) {
+    const sweetBtn = document.querySelector('.btn-yes-sweet');
+    const threatBtn = document.querySelector('.btn-yes-threat');
+    if(sweetBtn) sweetBtn.style.display = 'none';
+    if(threatBtn) threatBtn.style.display = 'none';
+    
+    const msg = document.getElementById('response-msg');
+    msg.style.display = 'block';
+    msg.textContent = messageText;
+    launchHearts();
+  }
+
+  function launchHearts() {
+    for (let i = 0; i < 50; i++) {
+      setTimeout(() => {
+        const h = document.createElement('div');
+        h.textContent = ['💙','✨','⭐','💫','🌹'][Math.floor(Math.random()*5)];
+        h.style.cssText = `position:fixed;font-size:${1.5+Math.random()*2}rem;left:${Math.random()*100}vw;top:100vh;z-index:9999;animation:rise 2.5s ease-out forwards;pointer-events:none;`;
+        document.body.appendChild(h);
+        setTimeout(() => h.remove(), 2600);
+      }, i * 70);
+    }
+  }
+
+  const riseStyle = document.createElement('style');
+  riseStyle.textContent = `
+    @keyframes rise {
+      0%   { transform: translateY(0) rotate(0deg); opacity:1; }
+      100% { transform: translateY(-110vh) rotate(${Math.random()*360}deg); opacity:0; }
+    }
+  `;
+  document.head.appendChild(riseStyle);
+
+  // ===== SCRATCH CARDS FUNCTIONALITY =====
+  let scratchInitialized = false;
+  function initScratchCards() {
+    if (scratchInitialized) return;
+    scratchInitialized = true;
+
+    const canvases = document.querySelectorAll('.scratch-canvas');
+    canvases.forEach(canvas => {
+      const ctx = canvas.getContext('2d');
+      const parent = canvas.parentElement;
+      const w = parent.offsetWidth;
+      const h = parent.offsetHeight;
+      
+      canvas.width = w;
+      canvas.height = h;
+
+      // Colors from attributes
+      const gradStart = canvas.getAttribute('data-grad-start') || '#e8c88c';
+      const gradEnd = canvas.getAttribute('data-grad-end') || '#b59450';
+      const coverText = canvas.getAttribute('data-text') || 'Gratte ici ✦';
+
+      // Draw the gorgeous metallic gradient (Image 2 style)
+      const grad = ctx.createLinearGradient(0, 0, w, h);
+      grad.addColorStop(0, gradStart);
+      grad.addColorStop(0.5, 'rgba(255, 255, 255, 0.98)'); // Fully opaque highlight to completely hide writing
+      grad.addColorStop(1, gradEnd);
+      
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      // Add elegant silver canvas texture/dots
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+      for(let x=10; x<w; x+=20) {
+        for(let y=10; y<h; y+=20) {
+          ctx.beginPath();
+          ctx.arc(x, y, 1.2, 0, Math.PI*2);
+          ctx.fill();
+        }
+      }
+
+      // Add label text centered
+      ctx.font = 'italic 1.05rem "Playfair Display", serif';
+      ctx.fillStyle = '#000000';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(coverText, w/2, h/2);
+
+      // Scratch logic
+      let isDrawing = false;
+      let checkTimeout = null;
+      let revealed = false;
+
+      function checkReveal() {
+        if (revealed) return;
+        const imageData = ctx.getImageData(0, 0, w, h);
+        const pixels = imageData.data;
+        let transparent = 0;
+        const step = 40; // check every 10th pixel for performance
+        for (let i = 3; i < pixels.length; i += step) {
+          if (pixels[i] === 0) transparent++;
+        }
+        const pct = (transparent / (pixels.length / step)) * 100;
+        if (pct > 40) {
+          revealed = true;
+          canvas.style.transition = 'opacity 0.6s ease';
+          canvas.style.opacity = '0';
+          setTimeout(() => { canvas.style.display = 'none'; }, 600);
+          triggerCardSparkles(canvas);
+        }
+      }
+
+      function scratch(x, y) {
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(x, y, 22, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      function handleMove(e) {
+        if (!isDrawing || revealed) return;
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        scratch(clientX - rect.left, clientY - rect.top);
+
+        if (!checkTimeout) {
+          checkTimeout = setTimeout(() => {
+            checkReveal();
+            checkTimeout = null;
+          }, 100);
+        }
+      }
+
+      canvas.addEventListener('mousedown', () => { if (!revealed) isDrawing = true; });
+      canvas.addEventListener('touchstart', () => { if (!revealed) isDrawing = true; });
+
+      window.addEventListener('mouseup', () => {
+        if (isDrawing) {
+          isDrawing = false;
+          checkReveal();
+        }
+      });
+      window.addEventListener('touchend', () => {
+        if (isDrawing) {
+          isDrawing = false;
+          checkReveal();
+        }
+      });
+
+      canvas.addEventListener('mousemove', handleMove);
+      canvas.addEventListener('touchmove', handleMove);
+    });
+  }
+
+  function triggerCardSparkles(canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const centerX = window.scrollX + rect.left + rect.width / 2;
+    const centerY = window.scrollY + rect.top + rect.height / 2;
+    
+    const particles = 30;
+    for (let i = 0; i < particles; i++) {
+      setTimeout(() => {
+        const s = document.createElement('div');
+        s.textContent = ['✨','⭐','💙','💫','🌸','🎉'][Math.floor(Math.random()*6)];
+        const size = 1 + Math.random() * 1.3;
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 30 + Math.random() * 80;
+        const tx = Math.cos(angle) * dist;
+        const ty = Math.sin(angle) * dist - 50;
+        
+        s.style.cssText = `
+          position: absolute;
+          left: ${centerX}px;
+          top: ${centerY}px;
+          font-size: ${size}rem;
+          z-index: 9999;
+          pointer-events: none;
+          transform: translate(-50%, -50%);
+          --tx: ${tx}px;
+          --ty: ${ty}px;
+          --rot: ${Math.random() * 360}deg;
+          animation: cardBurst 1.2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        `;
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 1300);
+      }, i * 15);
+    }
+  }
+
+  // ===== SPARKLE CANVAS =====
+  const canvas  = document.getElementById('sparkle-canvas');
+  const ctx     = canvas.getContext('2d');
+  let   W, H;
+  const stars   = [];
+  const STAR_COUNT = 150;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  class Star {
+    constructor() { this.reset(true); }
+    reset(init=false) {
+      this.x     = Math.random() * W;
+      this.y     = init ? Math.random() * H : -10;
+      this.r     = 0.4 + Math.random() * 1.8;
+      this.speed = 0.08 + Math.random() * 0.22;
+      this.alpha = 0;
+      this.maxA  = 0.3 + Math.random() * 0.7;
+      this.phase = Math.random() * Math.PI * 2;
+      this.freq  = 0.008 + Math.random() * 0.02;
+      this.color = Math.random() < 0.15 ? '#ffd700' :
+                   Math.random() < 0.5  ? '#bfe0ff' : '#ffffff';
+    }
+    update(t) {
+      this.y    += this.speed;
+      this.alpha = this.maxA * (0.6 + 0.4 * Math.sin(t * this.freq + this.phase));
+      if (this.y > H + 10) this.reset();
+    }
+    draw() {
+      ctx.save();
+      ctx.globalAlpha = this.alpha;
+      ctx.fillStyle   = this.color;
+      ctx.shadowColor = this.color;
+      ctx.shadowBlur  = this.r * 6;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  for (let i = 0; i < STAR_COUNT; i++) stars.push(new Star());
+
+  // Shooting stars
+  const shooters = [];
+  class Shooter {
+    constructor() { this.reset(); }
+    reset() {
+      this.x     = Math.random() * W;
+      this.y     = Math.random() * H * 0.5;
+      this.len   = 80 + Math.random() * 120;
+      this.speed = 6 + Math.random() * 6;
+      this.alpha = 0;
+      this.life  = 0;
+      this.maxLife = 40 + Math.random() * 30;
+      this.angle = Math.PI / 5 + Math.random() * (Math.PI / 8);
+      this.active = false;
+      this.timer  = Math.random() * 300;
+    }
+    update() {
+      if (!this.active) { this.timer--; if (this.timer <= 0) this.active = true; return; }
+      this.life++;
+      this.x    += Math.cos(this.angle) * this.speed;
+      this.y    += Math.sin(this.angle) * this.speed;
+      this.alpha = this.life < 10 ? this.life / 10 : 1 - (this.life - 10) / (this.maxLife - 10);
+      if (this.life >= this.maxLife) this.reset();
+    }
+    draw() {
+      if (!this.active) return;
+      const dx = Math.cos(this.angle) * this.len;
+      const dy = Math.sin(this.angle) * this.len;
+      const grad = ctx.createLinearGradient(this.x - dx, this.y - dy, this.x, this.y);
+      grad.addColorStop(0, `rgba(255,255,255,0)`);
+      grad.addColorStop(1, `rgba(191,224,255,${this.alpha})`);
+      ctx.save();
+      ctx.strokeStyle   = grad;
+      ctx.lineWidth     = 1.5;
+      ctx.shadowColor   = '#bfe0ff';
+      ctx.shadowBlur    = 10;
+      ctx.globalAlpha   = this.alpha;
+      ctx.beginPath();
+      ctx.moveTo(this.x - dx, this.y - dy);
+      ctx.lineTo(this.x, this.y);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  for (let i = 0; i < 4; i++) shooters.push(new Shooter());
+
+  // Mouse sparkles
+  let mouseSparkles = [];
+  document.addEventListener('mousemove', e => {
+    if (Math.random() < 0.35) {
+      mouseSparkles.push({
+        x: e.clientX, y: e.clientY,
+        life: 0, maxLife: 30 + Math.random() * 20,
+        r: 1 + Math.random() * 2,
+        vx: (Math.random() - 0.5) * 2,
+        vy: -1 - Math.random() * 2,
+        color: Math.random() < 0.3 ? '#ffd700' : '#bfe0ff'
+      });
+    }
+  });
+
+  // Touch sparkles (Mobile support)
+  document.addEventListener('touchmove', e => {
+    if (Math.random() < 0.35 && e.touches.length > 0) {
+      mouseSparkles.push({
+        x: e.touches[0].clientX, y: e.touches[0].clientY,
+        life: 0, maxLife: 30 + Math.random() * 20,
+        r: 1 + Math.random() * 2,
+        vx: (Math.random() - 0.5) * 2,
+        vy: -1 - Math.random() * 2,
+        color: Math.random() < 0.3 ? '#ffd700' : '#bfe0ff'
+      });
+    }
+  });
+
+  function animate(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    // Gradient background overlay
+    const bg = ctx.createRadialGradient(W*0.3, H*0.2, 0, W*0.3, H*0.2, W*0.8);
+    bg.addColorStop(0, 'rgba(84,155,242,0.06)');
+    bg.addColorStop(1, 'transparent');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    stars.forEach(s => { s.update(t); s.draw(); });
+    shooters.forEach(s => { s.update(); s.draw(); });
+
+    mouseSparkles = mouseSparkles.filter(p => p.life < p.maxLife);
+    mouseSparkles.forEach(p => {
+      p.life++;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.05;
+      const a = 1 - p.life / p.maxLife;
+      ctx.save();
+      ctx.globalAlpha   = a;
+      ctx.fillStyle     = p.color;
+      ctx.shadowColor   = p.color;
+      ctx.shadowBlur    = p.r * 5;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+
+    requestAnimationFrame(animate);
+  }
+  requestAnimationFrame(animate);
+
+  // Trigger typewriter initially if session is already active
+  if (localStorage.getItem("makaty_login") === "true") {
+    setTimeout(startTypewriter, 500);
+  }
+</script>
+</body>
+</html>
